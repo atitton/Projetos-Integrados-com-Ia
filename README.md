@@ -1,47 +1,59 @@
-# Options Volatility Analytics System
+# Sistema de Análise Quantitativa (DV + Opções)
 
-Production-oriented Python toolkit to analyze implied volatility, skew, term structure, and volatility surface from options CSV data.
+Projeto Python com **dois fluxos compatíveis**:
 
-## Modules
+1. **Pipeline DV legado** (MT5 + macro + ATR/ML), preservado para manter compatibilidade com integrações anteriores.
+2. **Analytics de Opções** (volatilidade implícita, skew, estrutura a termo e superfície).
 
-- `data_loader.py`: CSV ingestion, schema validation, cleaning, and feature prep (`time_to_expiration`, `log_moneyness`).
-- `black_scholes.py`: Black-Scholes pricing + vega for calls and puts.
-- `implied_vol.py`: Robust IV solver (Newton-Raphson with Brent fallback).
-- `analytics.py`: IV computation pipeline, skew metrics, term structure, regime/anomaly flags.
-- `visualization.py`: Smile, ATM term structure, and 3D volatility surface (Plotly HTML outputs).
-- `main.py`: CLI entrypoint and console summary.
+## Módulos principais
 
-## Expected Input CSV Columns
+### DV (legado)
+- `dv_calculator.py`
+- `macro_data.py`
+- `ml_model.py`
+- `mt5_connection.py`
+- `technical_indicators.py`
 
+### Opções (novo)
+- `data_loader.py`: ingestão do CSV, validação de esquema, limpeza e criação de features (`time_to_expiration`, `log_moneyness`).
+- `black_scholes.py`: precificação Black-Scholes e vega para calls e puts.
+- `implied_vol.py`: solver robusto de volatilidade implícita (Newton-Raphson com fallback de Brent).
+- `analytics.py`: pipeline de IV, métricas de skew, estrutura a termo ATM, detecção de regime e anomalias.
+- `visualization.py`: gráficos de smile, estrutura a termo ATM e superfície 3D (saída HTML com Plotly).
+
+## CLI unificada (`main.py`)
+
+### 1) Modo DV legado
+```bash
+python main.py dv \
+  --symbol "WIN$N" \
+  --start "2024-01-01" \
+  --end "2024-03-01" \
+  --use_ml \
+  --atr_period 14 \
+  --multipliers 1 2 3 4 \
+  --output_path dv_resultados.csv
+```
+
+### 2) Modo Opções
+```bash
+python main.py options \
+  --input_csv data/options_quotes.csv \
+  --output_dir outputs \
+  --risk_free_rate 0.105
+```
+
+## Formato esperado do CSV de opções
 - `underlying_price`
 - `option_type` (`call`/`put`)
 - `strike`
 - `expiration_date`
 - `days_to_expiration`
 - `option_price`
-- `risk_free_rate` (optional; default from CLI)
+- `risk_free_rate` (opcional; usa default da CLI quando ausente)
 
-## Installation
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-## Usage
-
-```bash
-python main.py \
-  --input_csv data/options_quotes.csv \
-  --output_dir outputs \
-  --risk_free_rate 0.105
-```
-
-## Outputs
-
-Inside `output_dir`:
-
+## Saídas do modo Opções
+Dentro de `output_dir`:
 - `options_with_iv.csv`
 - `skew_metrics.csv`
 - `term_structure.csv`
@@ -52,10 +64,9 @@ Inside `output_dir`:
 - `term_structure.html`
 - `vol_surface.html`
 
-## Notes for Traders
-
-The dashboard helps answer:
-
-- Where volatility is expensive/cheap (absolute IV + term profile)
-- Whether downside or upside fear dominates (skew)
-- If short-end volatility stress is present (spikes in short maturities)
+## Instalação
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
