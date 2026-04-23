@@ -10,3 +10,6 @@ fredapi
 python-dotenv
 openpyxl
 pytest
+
+scipy
+plotly
