@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import argparse
-import logging
 from pathlib import Path
-from typing import List
 
 import numpy as np
 import pandas as pd
@@ -65,11 +63,10 @@ def run_pipeline(
 
     feature_cols = [c for c in df.columns if c not in {"date", "atr", "atr_target"} and df[c].dtype != "O"]
 
-    if use_ml:
-        model = ATRModel()
-        model.train(df, feature_cols=feature_cols, target_col="atr_target")
-        df["atr_pred"] = model.predict(df)
-        model.save()
+    if avg_iv > 0.45:
+        vol_level = "Volatility looks expensive in absolute terms"
+    elif avg_iv < 0.20:
+        vol_level = "Volatility looks relatively cheap"
     else:
         df["atr_pred"] = df["atr"]
 
