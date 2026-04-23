@@ -1,17 +1,25 @@
-# Projeto DV com ATR (MT5 + Macro + ML)
+# Sistema de Análise de Volatilidade de Opções
 
-Pipeline completo para gerar níveis DV diários a partir de dados reais de mercado via MetaTrader5, enriquecidos com dados macroeconômicos, indicadores técnicos e previsão de ATR.
+Toolkit Python orientado a produção para analisar volatilidade implícita, skew, estrutura a termo e superfície de volatilidade a partir de CSV de opções.
 
-## Estrutura
+## Módulos
 
-- `mt5_connection.py`: conexão MT5 e extração OHLCV.
-- `macro_data.py`: ingestão de macro dados (BCB, Yahoo, FRED) e merge com mercado.
-- `technical_indicators.py`: cálculo de ATR, RSI, MACD e features técnicas.
-- `ml_model.py`: treino, persistência e inferência do modelo de previsão de ATR.
-- `dv_calculator.py`: cálculo de `target_date`, `ref_price` e níveis DV.
-- `main.py`: CLI principal.
-- `tests/`: testes com Pytest.
-- `requirements.txt`: dependências.
+- `data_loader.py`: ingestão do CSV, validação de esquema, limpeza e criação de features (`time_to_expiration`, `log_moneyness`).
+- `black_scholes.py`: precificação Black-Scholes e vega para calls e puts.
+- `implied_vol.py`: solver robusto de volatilidade implícita (Newton-Raphson com fallback de Brent).
+- `analytics.py`: pipeline de IV, métricas de skew, estrutura a termo ATM, detecção de regime e anomalias.
+- `visualization.py`: gráficos de smile, estrutura a termo ATM e superfície 3D (saída HTML com Plotly).
+- `main.py`: ponto de entrada CLI e resumo executivo no console.
+
+## Formato esperado do CSV de entrada
+
+- `underlying_price`
+- `option_type` (`call`/`put`)
+- `strike`
+- `expiration_date`
+- `days_to_expiration`
+- `option_price`
+- `risk_free_rate` (opcional; usa default da CLI quando ausente)
 
 ## Instalação
 
@@ -21,43 +29,33 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> Se usar FRED, configure `FRED_API_KEY` no ambiente (ou `.env`).
-
-## Execução CLI
+## Execução
 
 ```bash
-python main.py --symbol "WIN$N" --start "2023-01-01" --end "2024-03-06" --use_ml --atr_period 14 --multipliers 1 2 3 4 --output_path "dv_resultados.csv"
+python main.py \
+  --input_csv data/options_quotes.csv \
+  --output_dir outputs \
+  --risk_free_rate 0.105
 ```
 
-Saídas geradas:
+## Saídas
 
-- `dv_resultados.csv`
-- `dv_resultados.xlsx`
-- `artifacts/atr_model.pkl` (quando `--use_ml`)
+Dentro de `output_dir`:
 
-## Colunas de saída
+- `options_with_iv.csv`
+- `skew_metrics.csv`
+- `term_structure.csv`
+- `vol_regime.csv`
+- `skew_anomalies.csv`
+- `short_term_iv_spikes.csv`
+- `vol_smile.html`
+- `term_structure.html`
+- `vol_surface.html`
 
-- `calculation_date`
-- `target_date` (próximo dia útil considerando finais de semana + feriados fixos)
-- `ref_price` (`close_D`)
-- `atr_pred`
-- `dv_plus_1` a `dv_plus_4`
-- `dv_minus_1` a `dv_minus_4`
+## Como interpretar (visão de mesa)
 
-## Tratamento de erros e logging
+O dashboard ajuda a responder:
 
-- Erros de MT5 são capturados com exceção dedicada (`MT5ConnectionError`).
-- Fontes macro são tentadas de forma resiliente e consolidadas com preenchimento (`ffill/bfill`).
-- Logging informativo habilitado em `main.py`.
-
-## Testes
-
-```bash
-pytest -q
-```
-
-Coberturas principais:
-
-- Cálculo de ATR com série conhecida.
-- Previsão de ATR com modelo fake.
-- Integração ponta-a-ponta (MT5 + macro + previsão + exportação), usando mocks.
+- Onde a volatilidade está cara/barata (nível absoluto de IV + perfil temporal)
+- Se o mercado teme mais queda ou alta (skew)
+- Se há estresse de curto prazo (spikes na ponta curta)
