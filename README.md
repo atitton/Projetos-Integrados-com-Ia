@@ -1,72 +1,73 @@
-# Sistema de Análise Quantitativa (DV + Opções)
+# Sistema Quantitativo de Value Investing para Ações Brasileiras
 
-Projeto Python com **dois fluxos compatíveis**:
+Projeto Python modular para coletar dados de ações brasileiras, persistir histórico em SQLite, calcular fatores quantitativos de valor, aplicar filtros de risco/liquidez, montar uma carteira equal weight e apresentar resultados em Streamlit.
 
-1. **Pipeline DV legado** (MT5 + macro + ATR/ML), preservado para manter compatibilidade com integrações anteriores.
-2. **Analytics de Opções** (volatilidade implícita, skew, estrutura a termo e superfície).
+> O repositório também preserva os módulos legados de análise DV/opções existentes.
 
-## Módulos principais
+## Funcionalidades
 
-### DV (legado)
-- `dv_calculator.py`
-- `macro_data.py`
-- `ml_model.py`
-- `mt5_connection.py`
-- `technical_indicators.py`
+- Coleta de preços diários e volume financeiro via `yfinance`.
+- Coleta de fundamentos via BRAPI, com pontos de integração para Fundamentus e CVM.
+- Banco SQLite com tabelas de preços, fundamentos, indicadores, carteira e histórico de rebalanceamentos.
+- Indicadores: Earnings Yield, Cash Flow Yield e Book to Market.
+- Filtros: liquidez mínima, lucro líquido negativo, recuperação judicial, OPA, patrimônio líquido negativo e decil mais volátil.
+- Z-score por fator e score composto `Z(EY) + Z(CFY) + Z(BTM)`.
+- Carteira com as 20 melhores ações e pesos iguais.
+- Backtest equal weight, métricas de CAGR, Sharpe, Sortino, drawdown máximo, volatilidade, retorno acumulado, alpha, beta e tracking error.
+- Exportação de ranking, carteira e indicadores para Excel, além de relatório PDF.
+- Dashboard Streamlit com ranking, carteira, backtest, indicadores e empresas excluídas.
 
-### Opções (novo)
-- `data_loader.py`: ingestão do CSV, validação de esquema, limpeza e criação de features (`time_to_expiration`, `log_moneyness`).
-- `black_scholes.py`: precificação Black-Scholes e vega para calls e puts.
-- `implied_vol.py`: solver robusto de volatilidade implícita (Newton-Raphson com fallback de Brent).
-- `analytics.py`: pipeline de IV, métricas de skew, estrutura a termo ATM, detecção de regime e anomalias.
-- `visualization.py`: gráficos de smile, estrutura a termo ATM e superfície 3D (saída HTML com Plotly).
+## Estrutura
 
-## CLI unificada (`main.py`)
-
-### 1) Modo DV legado
-```bash
-python main.py dv \
-  --symbol "WIN$N" \
-  --start "2024-01-01" \
-  --end "2024-03-01" \
-  --use_ml \
-  --atr_period 14 \
-  --multipliers 1 2 3 4 \
-  --output_path dv_resultados.csv
+```text
+app.py                  # Dashboard Streamlit
+cli.py                  # Execução via terminal
+config.py               # Configuração centralizada por .env
+modules/                # Coleta, banco, fatores, backtest, exportação e pipeline
+database/               # SQLite local
+data/                   # Dados auxiliares
+output/                 # Excel/PDF gerados
+logs/                   # Logs da aplicação
+tests/                  # Testes automatizados
 ```
-
-### 2) Modo Opções
-```bash
-python main.py options \
-  --input_csv data/options_quotes.csv \
-  --output_dir outputs \
-  --risk_free_rate 0.105
-```
-
-## Formato esperado do CSV de opções
-- `underlying_price`
-- `option_type` (`call`/`put`)
-- `strike`
-- `expiration_date`
-- `days_to_expiration`
-- `option_price`
-- `risk_free_rate` (opcional; usa default da CLI quando ausente)
-
-## Saídas do modo Opções
-Dentro de `output_dir`:
-- `options_with_iv.csv`
-- `skew_metrics.csv`
-- `term_structure.csv`
-- `vol_regime.csv`
-- `skew_anomalies.csv`
-- `short_term_iv_spikes.csv`
-- `vol_smile.html`
-- `term_structure.html`
-- `vol_surface.html`
 
 ## Instalação
+
 ```bash
-python -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
 ```
+
+## Execução
+
+Pipeline via CLI:
+
+```bash
+python cli.py --tickers PETR4 VALE3 ITUB4 BBAS3 WEGE3
+```
+
+Dashboard:
+
+```bash
+streamlit run app.py
+```
+
+## Configuração
+
+Variáveis disponíveis em `.env`:
+
+- `DATABASE_PATH`
+- `OUTPUT_DIR`
+- `LOG_DIR`
+- `BRAPI_TOKEN`
+- `START_DATE`
+- `MIN_AVERAGE_VOLUME`
+- `PORTFOLIO_SIZE`
+- `TRADING_DAYS`
+- `RISK_FREE_RATE`
+
+## Observações de dados
+
+APIs são priorizadas. Scraping do Fundamentus fica isolado em `modules/data_sources.py` e deve ser usado apenas para campos indisponíveis por API. A integração CVM foi modelada como ponto de extensão para metadados de divulgação trimestral.
