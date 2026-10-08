@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Box Hyrox no Jardim Itu</title>
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Oswald";
+        src: url("assets/fonts/Oswald.woff2") format("woff2");
+        font-weight: 200 700;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("assets/fonts/IBMPlexMono-400.woff2") format("woff2");
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("assets/fonts/IBMPlexMono-500.woff2") format("woff2");
+        font-weight: 500;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #16181d; }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        background: #16181d; color: #f3f1ea;
+        font-family: "Oswald", sans-serif;
+      }
+      .clip { position: absolute; inset: 0; }
+      .vwrap { position: absolute; inset: 0; overflow: hidden; }
+      .vwrap video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .inner { position: absolute; inset: 0; }
+      .mono { font-family: "IBM Plex Mono", monospace; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+      .kicker { font-size: 28px; color: #e2571e; }
+      .muted { color: #a3a7ae; }
+      .paper { background: #f3f1ea; color: #16181d; }
+      .paper .muted { color: #5b5f66; }
+      .graphite { background: #16181d; }
+      .abs { position: absolute; }
+      .scrim-l { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(22,24,29,0.92) 0%, rgba(22,24,29,0.6) 45%, rgba(22,24,29,0.05) 80%); }
+      .scrim-b { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(22,24,29,0.95) 0%, rgba(22,24,29,0.55) 40%, rgba(22,24,29,0.1) 75%); }
+      .scrim-full { position: absolute; inset: 0; background: rgba(22,24,29,0.72); }
+      .h-xl { font-size: 150px; font-weight: 700; line-height: 0.95; text-transform: uppercase; }
+      .h-l { font-size: 96px; font-weight: 700; line-height: 1; text-transform: uppercase; }
+      .h-m { font-size: 64px; font-weight: 500; line-height: 1.1; }
+      .body { font-size: 40px; font-weight: 400; line-height: 1.25; }
+      .orange { color: #e2571e; }
+
+      /* S1 */
+      #s1-labels { left: 128px; top: 300px; display: flex; flex-direction: column; gap: 22px; }
+      #s1-labels div { font-size: 34px; }
+      #s1-title { left: 120px; bottom: 120px; font-size: 300px; font-weight: 700; line-height: 0.85; letter-spacing: 0.01em; }
+
+      /* S2 */
+      #s2-km { left: 128px; top: 250px; width: 620px; }
+      #s2-km .big { font-size: 280px; font-weight: 700; line-height: 0.85; }
+      #s2-panel { left: 800px; top: 0; width: 1120px; height: 1080px; background: #1e2128; padding: 150px 110px 0 100px; }
+      #s2-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 34px 60px; margin-top: 46px; }
+      .station { display: flex; align-items: baseline; gap: 22px; border-top: 2px solid #3a3e47; padding-top: 18px; }
+      .station .n { font-family: "IBM Plex Mono", monospace; font-size: 26px; color: #e2571e; }
+      .station .t { font-size: 46px; font-weight: 500; line-height: 1.05; }
+      .station .s { font-family: "IBM Plex Mono", monospace; font-size: 22px; color: #a3a7ae; margin-top: 6px; }
+      #s2-foot { left: 900px; bottom: 96px; width: 920px; font-size: 52px; font-weight: 500; }
+
+      /* S3 */
+      #s3-head { left: 128px; top: 128px; }
+      #s3-row { left: 128px; right: 128px; top: 380px; display: flex; gap: 72px; }
+      .stat { flex: 1; border-top: 4px solid #16181d; padding-top: 28px; }
+      .stat .v { font-size: 190px; font-weight: 700; line-height: 0.95; }
+      .stat .l { font-size: 40px; line-height: 1.25; margin-top: 24px; font-weight: 400; }
+
+      /* S4 */
+      #s4-a { left: 128px; top: 180px; width: 1100px; }
+      #s4-chips { left: 128px; bottom: 140px; display: flex; gap: 28px; }
+      .chip { border: 2px solid #f3f1ea; padding: 18px 30px; font-size: 40px; font-weight: 500; background: rgba(22,24,29,0.55); }
+      #s4-b { left: 0; top: 0; width: 1920px; height: 1080px; background: #16181d; }
+      #s4-plan { left: 200px; top: 420px; width: 1520px; height: 250px; border: 6px solid #f3f1ea; }
+      #s4-door { left: 194px; top: 490px; width: 6px; height: 110px; background: #16181d; }
+      #s4-lane { left: 260px; top: 530px; width: 1340px; height: 30px; }
+      #s4-lane-bar { position: absolute; left: 0; top: 11px; width: 1300px; height: 8px; background: #e2571e; }
+      #s4-lane-tip { position: absolute; right: 0; top: 0; width: 0; height: 0; border-top: 15px solid transparent; border-bottom: 15px solid transparent; border-left: 40px solid #e2571e; }
+      #s4-dimw { left: 200px; top: 700px; width: 1520px; text-align: center; font-size: 34px; }
+      #s4-area { left: 200px; top: 170px; }
+      #s4-lanelab { left: 1250px; top: 470px; font-size: 26px; }
+      #s4-quote { left: 200px; top: 820px; width: 1520px; font-size: 64px; font-weight: 500; }
+
+      /* S5 */
+      #s5-map { left: 160px; top: 100px; width: 900px; height: 900px; }
+      #s5-ring { position: absolute; left: 30px; top: 30px; width: 840px; height: 840px; border-radius: 50%; border: 3px dashed #4a4f59; }
+      #s5-ring-lab { position: absolute; left: 450px; top: 60px; font-size: 24px; }
+      .dot { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: #a3a7ae; }
+      .dot.o { background: #e2571e; width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+      .dot.c { background: #f3f1ea; width: 34px; height: 34px; margin: -17px 0 0 -17px; border: 6px solid #16181d; outline: 4px solid #f3f1ea; }
+      .dlab { position: absolute; font-family: "IBM Plex Mono", monospace; font-size: 22px; color: #a3a7ae; white-space: nowrap; }
+      #s5-text { left: 1140px; top: 150px; width: 660px; display: flex; flex-direction: column; gap: 46px; }
+      #s5-text .h-m { font-size: 56px; }
+      #s5-note { left: 160px; bottom: 54px; font-size: 22px; }
+
+      /* S6 */
+      #s6-head { left: 128px; top: 128px; }
+      #s6-row { left: 128px; right: 128px; top: 470px; display: flex; align-items: stretch; gap: 0; }
+      .phase { width: 640px; background: rgba(243,241,234,0.96); color: #16181d; padding: 44px 48px; }
+      .phase .ph { font-size: 30px; }
+      .phase .pt { font-size: 66px; font-weight: 700; line-height: 1; margin-top: 14px; text-transform: uppercase; }
+      .phase .pd { font-size: 34px; line-height: 1.3; margin-top: 18px; color: #3b3e44; }
+      #s6-gate { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+      #s6-gate .g { font-size: 76px; font-weight: 700; color: #e2571e; line-height: 1; }
+      #s6-gate .gl { font-size: 26px; text-align: center; }
+      #s6-arrow { width: 260px; height: 8px; background: #e2571e; position: relative; }
+      #s6-arrow-tip { position: absolute; right: -30px; top: -14px; border-top: 18px solid transparent; border-bottom: 18px solid transparent; border-left: 34px solid #e2571e; }
+
+      /* S7 */
+      #s7-head { left: 128px; top: 128px; }
+      #s7-total { left: 128px; top: 190px; font-size: 190px; font-weight: 700; line-height: 1; }
+      #s7-bar { left: 128px; top: 560px; width: 1664px; height: 120px; }
+      .seg { position: absolute; top: 0; height: 120px; border-right: 4px solid #f3f1ea; }
+      .slab { position: absolute; width: 330px; }
+      .slab .v { font-size: 48px; font-weight: 700; line-height: 1; }
+      .slab .l { font-family: "IBM Plex Mono", monospace; font-size: 24px; line-height: 1.3; margin-top: 8px; color: #5b5f66; }
+      #s7-note { left: 128px; top: 870px; width: 640px; font-size: 26px; color: #e2571e; }
+
+      /* S8 */
+      #s8-head { left: 128px; top: 128px; }
+      #s8-cost { left: 128px; top: 200px; }
+      #s8-ticket { left: 1100px; top: 200px; }
+      .big2 { font-size: 150px; font-weight: 700; line-height: 1; }
+      #s8-ruler { left: 128px; top: 640px; width: 1664px; height: 200px; }
+      #s8-axis { position: absolute; left: 0; top: 100px; width: 1664px; height: 6px; background: #4a4f59; }
+      #s8-fill { position: absolute; left: 0; top: 100px; width: 887px; height: 6px; background: #e2571e; }
+      .tick { position: absolute; top: 118px; font-family: "IBM Plex Mono", monospace; font-size: 22px; color: #a3a7ae; width: 120px; margin-left: -60px; text-align: center; }
+      #s8-mark { position: absolute; left: 875px; top: 0; width: 24px; height: 106px; }
+      #s8-mark-line { position: absolute; left: 9px; top: 20px; width: 6px; height: 86px; background: #e2571e; }
+      #s8-mark-lab { left: 128px; top: 560px; width: 1664px; }
+      #s8-mark-lab div { position: absolute; left: 600px; width: 560px; text-align: center; font-size: 60px; font-weight: 700; }
+      #s8-full { position: absolute; left: 1664px; top: 30px; width: 300px; margin-left: -300px; text-align: right; font-size: 22px; }
+      #s8-foot { left: 128px; top: 900px; font-size: 48px; font-weight: 500; }
+
+      /* S9 */
+      #s9-head { left: 128px; top: 128px; }
+      #s9-row { left: 128px; right: 128px; top: 300px; display: flex; gap: 40px; }
+      .card { flex: 1; padding: 50px 46px 56px; border: 3px solid #16181d; }
+      .card .a { font-size: 120px; font-weight: 700; line-height: 1; }
+      .card .al { font-size: 28px; }
+      .card .r { font-size: 68px; font-weight: 700; margin-top: 44px; line-height: 1; }
+      .card .rl { font-size: 26px; margin-top: 10px; }
+      .card .p { font-size: 40px; margin-top: 40px; border-top: 2px solid #16181d; padding-top: 24px; font-weight: 500; }
+      .card.neg { background: #16181d; color: #f3f1ea; }
+      .card.neg .p { border-top-color: #f3f1ea; }
+      .card.hi { background: #e2571e; border-color: #e2571e; color: #16181d; }
+      .card.hi .p { border-top-color: #16181d; }
+
+      /* S10 */
+      #s10-head { left: 128px; top: 128px; }
+      #s10-title { left: 128px; top: 190px; }
+      .cmp { position: absolute; left: 128px; width: 1664px; }
+      .cmp .lab { font-size: 34px; margin-bottom: 18px; }
+      .cmp .bar { height: 90px; }
+      .cmp .val { font-size: 72px; font-weight: 700; margin-top: 18px; line-height: 1; }
+
+      /* S11 */
+      #s11-head { left: 128px; top: 200px; }
+      #s11-list { left: 128px; top: 330px; display: flex; flex-direction: column; gap: 30px; }
+      .step { display: flex; align-items: center; gap: 30px; font-size: 64px; font-weight: 500; }
+      .step .box { width: 52px; height: 52px; border: 4px solid #e2571e; flex: none; }
+      #s11-end { left: 0; top: 0; width: 1920px; height: 1080px; background: #16181d; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+      #s11-end .t { font-size: 140px; font-weight: 700; text-transform: uppercase; line-height: 1; }
+      #s11-black { left: 0; top: 0; width: 1920px; height: 1080px; background: #0b0c0f; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="135.39" data-width="1920" data-height="1080" data-fps="30">
+      <audio id="narracao" src="assets/narracao.wav" data-start="0" data-duration="135.39" data-track-index="20" data-volume="1"></audio>
+
+      <!-- Footage layers (silent b-roll) -->
+      <div class="vwrap" id="v1w"><video id="v1" class="clip" src="assets/cena-treno.mp4" muted playsinline data-start="0" data-duration="8.72" data-playback-rate="0.9" data-track-index="1"></video></div>
+      <div class="vwrap" id="v2w"><video id="v2" class="clip" src="assets/cena-ski.mp4" muted playsinline data-start="8.72" data-duration="6.2" data-track-index="1"></video></div>
+      <div class="vwrap" id="v4w"><video id="v4" class="clip" src="assets/cena-loja.mp4" muted playsinline data-start="33.11" data-duration="9.6" data-playback-rate="0.83" data-track-index="1"></video></div>
+      <div class="vwrap" id="v6w"><video id="v6" class="clip" src="assets/cena-turma.mp4" muted playsinline data-start="66.32" data-duration="11.95" data-playback-rate="0.66" data-track-index="1"></video></div>
+      <div class="vwrap" id="v11w"><video id="v11" class="clip" src="assets/cena-corrida.mp4" muted playsinline data-start="126.76" data-duration="8.63" data-playback-rate="0.92" data-track-index="1"></video></div>
+
+      <!-- 1 · Gancho -->
+      <section id="s1" class="clip" data-start="0" data-duration="8.72" data-track-index="2">
+        <div class="inner" id="s1-in">
+          <div class="scrim-l"></div>
+          <div id="s1-labels" class="abs mono">
+            <div id="s1-l1">Corrida + força</div>
+            <div id="s1-l2">A mesma prova no mundo inteiro</div>
+            <div id="s1-l3">Arenas lotadas no Brasil</div>
+          </div>
+          <div id="s1-title" class="abs">HYROX</div>
+        </div>
+      </section>
+
+      <!-- 2 · O que é -->
+      <section id="s2" class="clip" data-start="8.72" data-duration="14.19" data-track-index="2">
+        <div class="inner" id="s2-in">
+          <div class="scrim-l"></div>
+          <div id="s2-km" class="abs">
+            <div class="big" id="s2-big">8 KM</div>
+            <div class="mono kicker" id="s2-sub1" style="margin-top: 26px">de corrida</div>
+            <div class="h-m" id="s2-sub2" style="margin-top: 40px; width: 560px">+ 8 estações, uma a cada km</div>
+          </div>
+          <div id="s2-panel" class="abs">
+            <div class="mono kicker" id="s2-ptitle">As 8 estações</div>
+            <div id="s2-grid">
+              <div class="station" id="st1"><span class="n">01</span><div><div class="t">SkiErg</div><div class="s">ergômetro de esqui</div></div></div>
+              <div class="station" id="st5"><span class="n">05</span><div><div class="t">Remo</div><div class="s">ergômetro de remo</div></div></div>
+              <div class="station" id="st2"><span class="n">02</span><div><div class="t">Sled push</div><div class="s">empurrar o trenó</div></div></div>
+              <div class="station" id="st6"><span class="n">06</span><div><div class="t">Farmers carry</div><div class="s">carregar peso</div></div></div>
+              <div class="station" id="st3"><span class="n">03</span><div><div class="t">Sled pull</div><div class="s">puxar o trenó</div></div></div>
+              <div class="station" id="st7"><span class="n">07</span><div><div class="t">Sandbag lunges</div><div class="s">avanço com saco de areia</div></div></div>
+              <div class="station" id="st4"><span class="n">04</span><div><div class="t">Burpee jump</div><div class="s">burpee com salto</div></div></div>
+              <div class="station" id="st8"><span class="n">08</span><div><div class="t">Wall balls</div><div class="s">bola na parede</div></div></div>
+            </div>
+          </div>
+          <div id="s2-foot" class="abs orange">Movimento simples. Iniciante consegue fazer.</div>
+        </div>
+      </section>
+
+      <!-- 3 · Mercado -->
+      <section id="s3" class="clip paper" data-start="22.91" data-duration="10.2" data-track-index="2">
+        <div class="inner" id="s3-in">
+          <div id="s3-head" class="abs mono kicker">O Hyrox no Brasil</div>
+          <div id="s3-row" class="abs">
+            <div class="stat" id="s3-a"><div class="v" id="s3-va">4.000+</div><div class="l">atletas na última etapa de São Paulo</div></div>
+            <div class="stat" id="s3-b"><div class="v" id="s3-vb">200+</div><div class="l">academias afiliadas no país</div></div>
+            <div class="stat" id="s3-c"><div class="v orange" id="s3-vc">0</div><div class="l">provas no Sul, por enquanto</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 · O ponto -->
+      <section id="s4" class="clip" data-start="33.11" data-duration="18.76" data-track-index="2">
+        <div class="inner" id="s4-in">
+          <div class="scrim-l"></div>
+          <div id="s4-a" class="abs">
+            <div class="mono kicker" id="s4-k">O ponto</div>
+            <div class="h-l" id="s4-t1" style="margin-top: 24px">Rua Gomes de Freitas</div>
+            <div class="h-m muted" id="s4-t2" style="margin-top: 16px">Jardim Itu-Sabará · Porto Alegre</div>
+          </div>
+          <div id="s4-chips" class="abs">
+            <div class="chip" id="s4-c1">Residencial</div>
+            <div class="chip" id="s4-c2">31 mil moradores</div>
+            <div class="chip" id="s4-c3">400 m da Av. Assis Brasil</div>
+          </div>
+          <div id="s4-b" class="abs">
+            <div id="s4-area" class="abs">
+              <div class="mono kicker">A loja</div>
+              <div class="h-l" style="margin-top: 16px; text-transform: none">~150 m²</div>
+            </div>
+            <div id="s4-plan" class="abs"></div>
+            <div id="s4-door" class="abs"></div>
+            <div id="s4-lane" class="abs"><div id="s4-lane-bar"></div><div id="s4-lane-tip"></div></div>
+            <div id="s4-lanelab" class="abs mono orange">Raia do trenó</div>
+            <div id="s4-dimw" class="abs mono muted">Comprida e estreita</div>
+            <div id="s4-quote" class="abs">Parece defeito. <span class="orange">É o formato certo.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 · Concorrência -->
+      <section id="s5" class="clip graphite" data-start="51.87" data-duration="14.45" data-track-index="2">
+        <div class="inner" id="s5-in">
+          <div id="s5-map" class="abs">
+            <div id="s5-ring"></div>
+            <div id="s5-ring-lab" class="mono muted">1,5 km</div>
+            <div class="dot gr" style="left: 548px; top: 405px"></div>
+            <div class="dlab gr" style="left: 580px; top: 392px">Engenharia do Corpo · 0,4 km</div>
+            <div class="dot gr" style="left: 291px; top: 352px"></div>
+            <div class="dlab gr" style="left: 120px; top: 300px">Play Vitta · 0,7 km</div>
+            <div class="dot gr" style="left: 160px; top: 600px"></div>
+            <div class="dlab gr" style="left: 70px; top: 630px">Action Fit · 1,2 km</div>
+            <div class="dot gr" style="left: 690px; top: 210px"></div>
+            <div class="dlab gr" style="left: 560px; top: 150px">Moinhos Fitness · 1,2 km</div>
+            <div class="dot gr" style="left: 790px; top: 640px"></div>
+            <div class="dlab gr" style="left: 600px; top: 680px">Práxis · 1,4 km</div>
+            <div class="dot o" id="s5-sf" style="left: 330px; top: 690px"></div>
+            <div class="dlab" id="s5-sflab" style="left: 210px; top: 730px; color: #e2571e; font-size: 26px">SuperForce · 0,9 km</div>
+            <div class="dot c" style="left: 450px; top: 450px"></div>
+            <div class="dlab" style="left: 395px; top: 485px; color: #f3f1ea">O PONTO</div>
+          </div>
+          <div id="s5-text" class="abs">
+            <div id="s5-t1"><div class="mono kicker">Raio de 1,5 km</div></div>
+            <div id="s5-t2"><div class="h-m">Musculação não falta</div><div class="body muted" style="margin-top: 8px">a partir de R$ 70 por mês</div></div>
+            <div id="s5-t3"><div class="h-m orange">Box com Hyrox: só um</div><div class="body muted" style="margin-top: 8px">de rede, a 900 m</div></div>
+            <div id="s5-t4"><div class="h-m">Espaço para um box de bairro, focado, com turma pequena</div></div>
+          </div>
+          <div id="s5-note" class="abs mono muted">Posições ilustrativas · distâncias em linha reta (OpenStreetMap)</div>
+        </div>
+      </section>
+
+      <!-- 6 · Plano em 2 fases -->
+      <section id="s6" class="clip" data-start="66.32" data-duration="11.95" data-track-index="2">
+        <div class="inner" id="s6-in">
+          <div class="scrim-full"></div>
+          <div id="s6-head" class="abs">
+            <div class="mono kicker" id="s6-k">O plano</div>
+            <div class="h-l" id="s6-t" style="margin-top: 20px">Começa sem aluguel</div>
+          </div>
+          <div id="s6-row" class="abs">
+            <div class="phase" id="s6-p1">
+              <div class="mono ph orange">Fase 1</div>
+              <div class="pt">Turma teste</div>
+              <div class="pd" id="s6-p1d">3 meses em horário alugado, com equipamento que depois vai para o box</div>
+            </div>
+            <div id="s6-gate">
+              <div class="g" id="s6-g">35 alunos</div>
+              <div class="mono gl" id="s6-gl">pagando</div>
+              <div id="s6-arrow"><div id="s6-arrow-tip"></div></div>
+            </div>
+            <div class="phase" id="s6-p2">
+              <div class="mono ph orange">Fase 2</div>
+              <div class="pt">A loja</div>
+              <div class="pd">abre só com a procura comprovada</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 · Investimento -->
+      <section id="s7" class="clip paper" data-start="78.27" data-duration="17.11" data-track-index="2">
+        <div class="inner" id="s7-in">
+          <div id="s7-head" class="abs mono kicker">Investimento total</div>
+          <div id="s7-total" class="abs">R$ <span id="s7-num">125</span> mil</div>
+          <div id="s7-bar" class="abs">
+            <div class="seg" id="sg1" style="left: 0; width: 732px; background: #e2571e"></div>
+            <div class="seg" id="sg2" style="left: 732px; width: 266px; background: #16181d"></div>
+            <div class="seg" id="sg3" style="left: 998px; width: 186px; background: #4a4f59"></div>
+            <div class="seg" id="sg4" style="left: 1184px; width: 80px; background: #8a8f98"></div>
+            <div class="seg" id="sg5" style="left: 1264px; width: 400px; background: #2c2f36; border-right: none"></div>
+            <div class="slab" id="sl1" style="left: 0; top: 150px"><div class="v">R$ 55 mil</div><div class="l">equipamento nacional</div></div>
+            <div class="slab" id="sl2" style="left: 732px; top: -130px; width: 260px"><div class="v">R$ 20 mil</div><div class="l">obra</div></div>
+            <div class="slab" id="sl3" style="left: 998px; top: 150px; width: 250px"><div class="v">R$ 14 mil</div><div class="l">licenças e garantia do aluguel</div></div>
+            <div class="slab" id="sl4" style="left: 1184px; top: -130px; width: 300px"><div class="v">R$ 6 mil</div><div class="l">teste e lançamento</div></div>
+            <div class="slab" id="sl5" style="left: 1290px; top: 150px; width: 370px"><div class="v">R$ 30 mil</div><div class="l">caixa dos primeiros meses</div></div>
+          </div>
+          <div id="s7-note" class="abs mono">Metade do preço do importado</div>
+        </div>
+      </section>
+
+      <!-- 8 · A conta -->
+      <section id="s8" class="clip graphite" data-start="95.39" data-duration="11.82" data-track-index="2">
+        <div class="inner" id="s8-in">
+          <div id="s8-head" class="abs mono kicker">A conta do mês</div>
+          <div id="s8-cost" class="abs">
+            <div class="big2">R$ 17 mil</div>
+            <div class="body muted" style="margin-top: 10px">custo fixo: aluguel, professores e o resto</div>
+          </div>
+          <div id="s8-ticket" class="abs">
+            <div class="big2">R$ 300</div>
+            <div class="body muted" style="margin-top: 10px">mensalidade por aluno</div>
+          </div>
+          <div id="s8-mark-lab" class="abs"><div id="s8-ml">Empata com 64 alunos</div></div>
+          <div id="s8-ruler" class="abs">
+            <div id="s8-axis"></div>
+            <div id="s8-fill"></div>
+            <div class="tick" style="left: 0">0</div>
+            <div class="tick" style="left: 416px">30</div>
+            <div class="tick" style="left: 832px">60</div>
+            <div class="tick" style="left: 1248px">90</div>
+            <div class="tick" style="left: 1664px">120</div>
+            <div id="s8-mark"><div id="s8-mark-line"></div></div>
+            <div id="s8-full" class="mono muted">casa cheia ~120</div>
+          </div>
+          <div id="s8-foot" class="abs">2 em cada mil moradores do bairro</div>
+        </div>
+      </section>
+
+      <!-- 9 · Cenários -->
+      <section id="s9" class="clip paper" data-start="107.21" data-duration="11.59" data-track-index="2">
+        <div class="inner" id="s9-in">
+          <div id="s9-head" class="abs mono kicker">Cenários por mês</div>
+          <div id="s9-row" class="abs">
+            <div class="card neg" id="s9-c45">
+              <div class="a">45</div><div class="mono al">alunos</div>
+              <div class="r">−R$ 5 mil</div><div class="mono rl">por mês</div>
+              <div class="p">Não se paga</div>
+            </div>
+            <div class="card" id="s9-c90">
+              <div class="a">90</div><div class="mono al">alunos</div>
+              <div class="r">+R$ 7,2 mil</div><div class="mono rl">por mês</div>
+              <div class="p">Volta em ~3 anos</div>
+            </div>
+            <div class="card hi" id="s9-c115">
+              <div class="a">115</div><div class="mono al">alunos</div>
+              <div class="r">+R$ 14 mil</div><div class="mono rl">por mês</div>
+              <div class="p">Volta em ~2 anos</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 · O teste protege -->
+      <section id="s10" class="clip graphite" data-start="118.8" data-duration="7.96" data-track-index="2">
+        <div class="inner" id="s10-in">
+          <div id="s10-head" class="abs mono kicker">Se a procura não aparecer</div>
+          <div id="s10-title" class="abs h-l">O teste protege</div>
+          <div class="cmp" id="s10-a" style="top: 400px">
+            <div class="lab mono muted">Testar antes e parar</div>
+            <div class="bar" id="s10-ba" style="width: 52px; background: #e2571e"></div>
+            <div class="val orange">~R$ 5 mil</div>
+          </div>
+          <div class="cmp" id="s10-b" style="top: 700px">
+            <div class="lab mono muted">Abrir direto e dar errado</div>
+            <div class="bar" id="s10-bb" style="width: 1456px; background: #4a4f59"></div>
+            <div class="val">~R$ 140 mil</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 · Próximos passos -->
+      <section id="s11" class="clip" data-start="126.76" data-duration="8.63" data-track-index="2">
+        <div class="inner" id="s11-in">
+          <div class="scrim-l"></div>
+          <div id="s11-head" class="abs mono kicker">Próximos passos</div>
+          <div id="s11-list" class="abs">
+            <div class="step" id="sp1"><div class="box"></div>Medir a loja</div>
+            <div class="step" id="sp2"><div class="box"></div>Confirmar na Prefeitura</div>
+            <div class="step" id="sp3"><div class="box"></div>Fechar o aluguel</div>
+            <div class="step" id="sp4"><div class="box"></div>Abrir a turma teste</div>
+          </div>
+          <div id="s11-end" class="abs">
+            <div class="mono kicker">Uma opção de negócio</div>
+            <div class="t">Box Hyrox</div>
+            <div class="h-m muted">Jardim Itu-Sabará · Porto Alegre</div>
+          </div>
+          <div id="s11-black" class="abs"></div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const S = [0, 0, 8.72, 22.91, 33.11, 51.87, 66.32, 78.27, 95.39, 107.21, 118.8, 126.76];
+      const D = [0, 8.72, 14.19, 10.2, 18.76, 14.45, 11.95, 17.11, 11.82, 11.59, 7.96, 8.63];
+      const at = (s, t) => S[s] + t;
+      const rise = (sel, s, t, o = {}) =>
+        tl.fromTo(sel, { opacity: 0, y: o.y ?? 36 }, { opacity: 1, y: 0, duration: o.d ?? 0.6, ease: o.ease ?? "power3.out", stagger: o.stagger ?? 0 }, at(s, t));
+      const fadeIn = (sel, s, t, d = 0.5) => tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: d, ease: "sine.out" }, at(s, t));
+      const fadeOut = (sel, s, t, d = 0.4) => tl.to(sel, { opacity: 0, duration: d, ease: "sine.in" }, at(s, t));
+      const grow = (sel, s, t, d = 0.8, ease = "expo.out") =>
+        tl.fromTo(sel, { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: d, ease }, at(s, t));
+      const fmt = (n) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const count = (id, to, suffix, s, t, d = 1.2) => {
+        const el = document.getElementById(id);
+        const o = { v: 0 };
+        tl.fromTo(o, { v: 0 }, { v: to, duration: d, ease: "power2.out", onUpdate: () => (el.textContent = fmt(o.v) + suffix) }, at(s, t));
+      };
+      // scene content entrances (fade in at scene head) and exits (fade at tail)
+      for (let s = 1; s <= 11; s++) {
+        tl.fromTo(`#s${s}-in`, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "sine.out" }, at(s, 0));
+        if (s < 11) fadeOut(`#s${s}-in`, s, D[s] - 0.35, 0.35);
+      }
+
+      // Footage: slow push-in on wrappers, soft fades
+      const kb = (w, s, d, from = 1.0, to = 1.08) => tl.fromTo(w, { scale: from }, { scale: to, duration: d, ease: "none" }, at(s, 0));
+      kb("#v1w", 1, D[1]);
+      kb("#v2w", 2, 6.2, 1.06, 1.0);
+      kb("#v4w", 4, 9.6);
+      kb("#v6w", 6, D[6], 1.04, 1.12);
+      kb("#v11w", 11, D[11]);
+      fadeIn("#v1w", 1, 0, 0.8);
+      fadeOut("#v1w", 1, D[1] - 0.4, 0.4);
+      fadeIn("#v2w", 2, 0, 0.4);
+      fadeOut("#v2w", 2, 5.4, 0.8);
+      fadeIn("#v4w", 4, 0, 0.4);
+      fadeIn("#v6w", 6, 0, 0.4);
+      fadeOut("#v6w", 6, D[6] - 0.35, 0.35);
+      fadeIn("#v11w", 11, 0, 0.4);
+
+      // 1 · Gancho
+      rise("#s1-l1", 1, 1.0, { y: 24 });
+      rise("#s1-l2", 1, 3.2, { y: 24 });
+      rise("#s1-l3", 1, 5.2, { y: 24 });
+      tl.fromTo("#s1-title", { opacity: 0, y: 80, scale: 1.08, transformOrigin: "0% 100%" }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "expo.out" }, at(1, 6.9));
+
+      // 2 · O que é
+      tl.fromTo("#s2-big", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.8, ease: "expo.out" }, at(2, 0.4));
+      rise("#s2-sub1", 2, 0.9, { y: 16 });
+      rise("#s2-sub2", 2, 2.4);
+      tl.fromTo("#s2-panel", { xPercent: 100 }, { xPercent: 0, duration: 0.9, ease: "power4.inOut" }, at(2, 3.2));
+      rise("#s2-ptitle", 2, 3.9, { y: 16 });
+      [["#st1", 4.3], ["#st2", 5.4], ["#st3", 5.6], ["#st4", 5.9], ["#st5", 6.3], ["#st6", 6.7], ["#st7", 7.6], ["#st8", 8.9]].forEach(([id, t]) =>
+        rise(id, 2, t, { y: 22, d: 0.45, ease: "back.out(1.6)" })
+      );
+      rise("#s2-foot", 2, 10.8, { y: 20 });
+
+      // 3 · Mercado
+      rise("#s3-head", 3, 0.2, { y: 16 });
+      rise("#s3-a", 3, 0.5);
+      count("s3-va", 4000, "+", 3, 0.6, 1.6);
+      rise("#s3-b", 3, 4.3);
+      count("s3-vb", 200, "+", 3, 4.4, 1.3);
+      rise("#s3-c", 3, 7.7, { ease: "back.out(2)" });
+
+      // 4 · O ponto
+      rise("#s4-k", 4, 0.3, { y: 16 });
+      tl.fromTo("#s4-t1", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.8, ease: "expo.out" }, at(4, 0.6));
+      rise("#s4-t2", 4, 3.1);
+      rise("#s4-c1", 4, 4.4, { y: 20, d: 0.45 });
+      rise("#s4-c2", 4, 5.7, { y: 20, d: 0.45 });
+      rise("#s4-c3", 4, 7.5, { y: 20, d: 0.45 });
+      tl.fromTo("#s4-b", { yPercent: 100 }, { yPercent: 0, duration: 0.8, ease: "power4.inOut" }, at(4, 9.0));
+      fadeOut("#v4w", 4, 9.6, 0.1);
+      fadeOut("#s4-a, #s4-chips", 4, 9.7, 0.1);
+      rise("#s4-area", 4, 9.7);
+      tl.fromTo("#s4-plan", { scaleX: 0.15, opacity: 0, transformOrigin: "0% 50%" }, { scaleX: 1, opacity: 1, duration: 1.2, ease: "expo.out" }, at(4, 10.4));
+      fadeIn("#s4-door", 4, 10.4, 0.2);
+      rise("#s4-dimw", 4, 12.5, { y: 16 });
+      rise("#s4-quote", 4, 13.8);
+      grow("#s4-lane-bar", 4, 16.0, 1.3, "power2.inOut");
+      fadeIn("#s4-lane-tip", 4, 17.1, 0.25);
+      rise("#s4-lanelab", 4, 16.2, { y: 14 });
+
+      // 5 · Concorrência
+      tl.fromTo("#s5-ring", { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.1, ease: "expo.out" }, at(5, 0.4));
+      fadeIn("#s5-ring-lab", 5, 1.0);
+      rise("#s5-t1", 5, 0.5, { y: 16 });
+      tl.fromTo("#s5-map .gr", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "sine.out", stagger: 0.12 }, at(5, 2.5));
+      rise("#s5-t2", 5, 2.6);
+      tl.fromTo("#s5-sf", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(3)" }, at(5, 6.1));
+      fadeIn("#s5-sflab", 5, 6.3, 0.4);
+      tl.to("#s5-sf", { scale: 1.35, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: 3 }, at(5, 7.0));
+      rise("#s5-t3", 5, 6.1);
+      rise("#s5-t4", 5, 10.1);
+      fadeIn("#s5-note", 5, 1.5);
+
+      // 6 · Plano
+      rise("#s6-k", 6, 0.4, { y: 16 });
+      rise("#s6-t", 6, 1.1);
+      tl.fromTo("#s6-p1", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, at(6, 2.7));
+      rise("#s6-p1d", 6, 3.4, { y: 12 });
+      rise("#s6-g", 6, 7.8, { ease: "back.out(2)" });
+      fadeIn("#s6-gl", 6, 8.1);
+      grow("#s6-arrow", 6, 8.4, 0.9);
+      tl.fromTo("#s6-p2", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, at(6, 9.9));
+
+      // 7 · Investimento
+      rise("#s7-head", 7, 0.2, { y: 16 });
+      rise("#s7-total", 7, 0.5);
+      count("s7-num", 125, "", 7, 0.6, 1.8);
+      grow("#sg1", 7, 4.1, 0.9);
+      rise("#sl1", 7, 4.4, { y: 16 });
+      rise("#s7-note", 7, 6.7, { y: 12 });
+      grow("#sg2", 7, 8.7, 0.6);
+      rise("#sl2", 7, 8.8, { y: -16 });
+      grow("#sg3", 7, 9.6, 0.6);
+      rise("#sl3", 7, 9.7, { y: 16 });
+      grow("#sg4", 7, 12.1, 0.5);
+      rise("#sl4", 7, 12.2, { y: -16 });
+      grow("#sg5", 7, 13.9, 0.8);
+      rise("#sl5", 7, 14.0, { y: 16 });
+
+      // 8 · A conta
+      rise("#s8-head", 8, 0.2, { y: 16 });
+      rise("#s8-cost", 8, 0.9);
+      rise("#s8-ticket", 8, 4.8);
+      fadeIn("#s8-ruler", 8, 6.2, 0.4);
+      grow("#s8-fill", 8, 6.6, 1.4, "power2.inOut");
+      tl.fromTo("#s8-mark", { x: -875, opacity: 0 }, { x: 0, opacity: 1, duration: 1.4, ease: "power2.inOut" }, at(8, 6.6));
+      rise("#s8-ml", 8, 7.6, { ease: "back.out(2)" });
+      rise("#s8-foot", 8, 8.9);
+
+      // 9 · Cenários (narration order: 90, 115, 45)
+      rise("#s9-head", 9, 0.2, { y: 16 });
+      rise("#s9-c90", 9, 0.5, { y: 60, d: 0.7 });
+      rise("#s9-c115", 9, 5.5, { y: 60, d: 0.7 });
+      rise("#s9-c45", 9, 8.9, { y: 60, d: 0.7 });
+
+      // 10 · Teste protege
+      rise("#s10-head", 10, 0.2, { y: 16 });
+      rise("#s10-title", 10, 0.5);
+      fadeIn("#s10-a", 10, 3.5, 0.3);
+      grow("#s10-ba", 10, 3.7, 0.6, "back.out(3)");
+      fadeIn("#s10-b", 10, 5.6, 0.3);
+      grow("#s10-bb", 10, 5.8, 1.4, "power3.inOut");
+
+      // 11 · Fechamento
+      rise("#s11-head", 11, 0.4, { y: 16 });
+      rise("#sp1", 11, 1.4, { y: 24, d: 0.5 });
+      rise("#sp2", 11, 2.2, { y: 24, d: 0.5 });
+      rise("#sp3", 11, 3.7, { y: 24, d: 0.5 });
+      rise("#sp4", 11, 4.6, { y: 24, d: 0.5 });
+      fadeIn("#s11-end", 11, 6.1, 0.6);
+      fadeOut("#s11-list, #s11-head", 11, 6.6, 0.1);
+      tl.fromTo("#s11-end .t", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "expo.out" }, at(11, 6.3));
+      fadeIn("#s11-black", 11, D[11] - 0.6, 0.6);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+models/
+snaps*/
+*.mp4
+!projeto/assets/cena-*.mp4
+projeto/renders/
